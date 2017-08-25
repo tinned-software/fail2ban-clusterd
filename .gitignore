@@ -99,3 +99,14 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+
+
+
+###
+# Custom ignore rules
+###
+TODO
+test.py
+fail2ban-clusterd.yml
+

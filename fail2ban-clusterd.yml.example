@@ -1,0 +1,9 @@
+servers:
+  - host: host.example.com
+    port: 1234
+    ping_timeout: 10
+    channels:
+      - name: Test1
+        action: "/path/to/executable \"%ip% - %hugo% - %ups% - %_msg%\" >>/path/to/logfile.txt"
+log_level: 3
+log_file: /var/log/fail2ban-clasterd.log
