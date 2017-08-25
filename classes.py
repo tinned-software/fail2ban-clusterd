@@ -76,7 +76,7 @@ class Fanout_Connection:
 		self.channels=channel_list
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.buffer=2048
-		self.shouldRun=True # to terminate all threads when false
+		self.shouldRun=True # thread stop flag, terminates all threads when false
 		self.is_recieveing=False # syncing the threads
 
 	# the function to establish the connection and subscribe to channels
@@ -95,19 +95,20 @@ class Fanout_Connection:
 
 	# the function that pings in a given intervall to see if the connection is still running
 	def ping(self):
+		# run loop until the thread should stop due to the close function
 		while self.shouldRun is True:
+			# thread syncing
 			while (self.is_recieveing is True):
 				pass
-				#time.sleep(0.1)
 			self.is_recieveing=True
 			logging.info("Started pinging to Server "+self.host+":"+str(self.port))
-			self.sock.send("ping\n")
-			data = self.sock.recv(32)
-			data = self.sock.recv(32)
+			self.sock.send("ping\n") # send ping
+			data = self.sock.recv(32) # the first value returns "debug!connected" and will be ingnored
+			data = self.sock.recv(32) # the actual ping return value
 			logging.info("Ping Data: "+str(data).strip())
 
 			try:
-				value = int(data.strip())
+				value = int(data.strip()) # ping should be an integer, if not connection will be reestablished
 				logging.info("Success on pinging to Server "+self.host+":"+str(self.port))
 			except ValueError:
 				for channel in self.channels:
@@ -120,26 +121,28 @@ class Fanout_Connection:
 	# the connection the recieve data from the connection
 	def recieve(self):
 		logging.info("Started recieving on connection "+self.host+":"+str(self.port))
+		# run loop until the thread should stop due to the close function
 		while self.shouldRun is True:
 			if self.is_recieveing is False:
 				self.is_recieveing=True
 				data = None
-				data = self.sock.recv(self.buffer_size)
+				data = self.sock.recv(self.buffer_size) # recieves data
 				if str(data) is not None:
 					logging.info("Data recived on connection "+self.host+":"+str(self.port)+". Data: "+str(data).strip())
+					# iterates through the channels and starts a new thread to run the action
 					for channel in self.channels:
-						thread.start_new_thread(channel.do_action, (str(data).strip(),))
+						thread.start_new_thread(channel.do_action, (str(data).strip(),)) # runs the action in a new thread
 						#channel.do_action(str(data).strip())
 				self.is_recieveing=False
 			time.sleep(0.01)
 
+	# the function starts the ping and recieve function in a new thread
 	def run(self):
 		self.shouldRun=True
 		thread.start_new_thread(self.recieve, ())
 		thread.start_new_thread(self.ping, ())
-		time.sleep(0.1)
-#		thread.start_new_thread(self.recieve, ())
 
+	# the function sets the thread stop flag and closes the connection
 	def close(self):
 		self.shouldRun=False
 		self.sock.close()

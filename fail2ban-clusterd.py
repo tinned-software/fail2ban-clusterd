@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
 # This python script is responsible to start, stop and restart the daemon.
+#
 # usage: python fail2ban-clusterd.py start|stop|restart
 
 # importing classes that are needed
