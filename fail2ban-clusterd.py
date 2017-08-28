@@ -7,14 +7,13 @@
 # importing classes that are needed
 import sys, time, os, socket, yaml, logging
 from daemon import Daemon
+from optparse import OptionParser
 from classes import Fanout_Channel, Fanout_Connection
 
+VERSION="0.1"
 # the MyDaemon class implements all functionality of the Daemon class and runs the code as daemon
 class MyDaemon(Daemon):
 	def run(self):
-		# reading yaml config file
-		stream = open("/etc/fail2ban-cluster.yml", "r")
-		yml = yaml.load(stream)
 		# initialize the log with some parameter
 		logging.basicConfig(filename=str(yml['log_file']),
                             filemode='a',
@@ -48,22 +47,36 @@ class MyDaemon(Daemon):
 			time.sleep(1)
 
 if __name__ == "__main__":
-	daemon = MyDaemon('/tmp/fanout.pid') # the pid file for the daemon
-	# start, stop or restart the daemon
-	if len(sys.argv) == 2:
-		if 'start' == sys.argv[1]:
-			daemon.start()
-		elif 'stop' == sys.argv[1]:
-			for con in daemon.connection_list:
-				con.close()
-			daemon.stop()
-		elif 'restart' == sys.argv[1]:
-			daemon.restart()
-		else:
-			print "Unknown command"
-			print "usage: %s start|stop|restart" % sys.argv[0]
-			sys.exit(2)
+	opts = OptionParser(usage="python fail2ban-clusterd.py start|stop|restart|[options]")
+	opts.add_option("-c", "--config", action="store", type="string", dest="configfile", help="Load an alternative config file. Default is /etc/fail2ben-cluster.yml")
+	opts.add_option("-V", "--version", action='store_true', dest='isVer', help="Show the version of the daemon")
+	(options, args) = opts.parse_args()
+
+	if options.isVer:
+		print VERSION
 		sys.exit(0)
+
+	if options.configfile is not None:
+		stream = open(options.configfile, "r")
 	else:
+		stream = open("/etc/fail2ban-cluster.yml", "r") # get the pid file location from the config
+        yml = yaml.load(stream)
+	daemon = MyDaemon(str(yml['pid_file'])) # the pid file for the daemon
+	# start, stop or restart the daemon
+#	if len(sys.argv) == 2:
+	if 'start' in sys.argv[1:]:
+		daemon.start()
+	elif 'stop' in sys.argv[1:]:
+		for con in daemon.connection_list:
+			con.close()
+		daemon.stop()
+	elif 'restart' in sys.argv[1:]:
+		daemon.restart()
+	else:
+		print "Unknown command"
 		print "usage: %s start|stop|restart" % sys.argv[0]
 		sys.exit(2)
+	sys.exit(0)
+#	else:
+#		print "usage: %s start|stop|restart" % sys.argv[0]
+#		sys.exit(2)

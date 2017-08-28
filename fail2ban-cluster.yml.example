@@ -7,3 +7,4 @@ servers:
         action: "/path/to/executable \"%ip% - %hugo% - %ups% - %_msg%\" >>/path/to/logfile.txt"
 log_level: 3
 log_file: /var/log/fail2ban-clasterd.log
+pid_file: /var/run/fail2ban-clusterd.pid
