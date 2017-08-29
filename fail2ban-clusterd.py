@@ -10,16 +10,28 @@ from daemon import Daemon
 from optparse import OptionParser
 from classes import Fanout_Channel, Fanout_Connection
 
-VERSION="0.1.0"
+# the version number of this build
+VERSION="0.1.1"
+
 # the MyDaemon class implements all functionality of the Daemon class and runs the code as daemon
 class MyDaemon(Daemon):
 	def run(self):
+		# get log level from config
+		if int(yml['log_level']) == 0:
+			lvl=40
+		elif int(yml['log_level']) == 1:
+			lvl=30
+		elif int(yml['log_level']) == 2:
+			lvl=20
+		elif int(yml['log_level']) > 2:
+			lvl=10
+
 		# initialize the log with some parameter
 		logging.basicConfig(filename=str(yml['log_file']),
-                            filemode='a',
-                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                            datefmt='%H:%M:%S',
-                            level=logging.DEBUG)
+                            filemode='a', # append
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s', # line format
+                            datefmt='%H:%M:%S', # date and time format
+                            level=lvl) # log level
 		logging.info("Daemon started and successfully read yml file")
 
 		# iterating through all the servers in yml file
@@ -47,23 +59,27 @@ class MyDaemon(Daemon):
 			time.sleep(1)
 
 if __name__ == "__main__":
-	opts = OptionParser(usage="python fail2ban-clusterd.py start|stop|restart|[options]")
+	# define command line options
+	opts = OptionParser(usage="python fail2ban-clusterd.py start|stop|restart|status|[options]")
 	opts.add_option("-c", "--config", action="store", type="string", dest="configfile", help="Load an alternative config file. Default is /etc/fail2ben-cluster.yml")
-	opts.add_option("-V", "--version", action='store_true', dest='isVer', help="Show the version of the daemon")
+	opts.add_option("-v", "--version", action='store_true', dest='isVer', help="Show the version of the daemon")
 	(options, args) = opts.parse_args()
 
+	# check if version parameter is set in the command line
 	if options.isVer:
-		print VERSION
+		print "The current version is "+VERSION
 		sys.exit(0)
 
+	# check if an alternative configfile is set in the command line
 	if options.configfile is not None:
 		stream = open(options.configfile, "r")
 	else:
 		stream = open("/etc/fail2ban-cluster.yml", "r") # get the pid file location from the config
         yml = yaml.load(stream)
+
 	daemon = MyDaemon(str(yml['pid_file'])) # the pid file for the daemon
+
 	# start, stop or restart the daemon
-#	if len(sys.argv) == 2:
 	if 'start' in sys.argv[1:]:
 		daemon.start()
 	elif 'stop' in sys.argv[1:]:
@@ -72,11 +88,10 @@ if __name__ == "__main__":
 		daemon.stop()
 	elif 'restart' in sys.argv[1:]:
 		daemon.restart()
+	elif 'status' in sys.argv[1:]:
+		daemon.status()
 	else:
 		print "Unknown command"
 		print "usage: %s start|stop|restart" % sys.argv[0]
 		sys.exit(2)
 	sys.exit(0)
-#	else:
-#		print "usage: %s start|stop|restart" % sys.argv[0]
-#		sys.exit(2)

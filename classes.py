@@ -105,7 +105,7 @@ class Fanout_Connection:
 			self.sock.send("ping\n") # send ping
 			data = self.sock.recv(32) # the first value returns "debug!connected" and will be ingnored
 			data = self.sock.recv(32) # the actual ping return value
-			logging.info("Ping Data: "+str(data).strip())
+			logging.debug("Ping Data: "+str(data).strip())
 
 			try:
 				value = int(data.strip()) # ping should be an integer, if not connection will be reestablished
@@ -128,7 +128,7 @@ class Fanout_Connection:
 				data = None
 				data = self.sock.recv(self.buffer_size) # recieves data
 				if str(data) is not None:
-					logging.info("Data recived on connection "+self.host+":"+str(self.port)+". Data: "+str(data).strip())
+					logging.debug("Data recived on connection "+self.host+":"+str(self.port)+". Data: "+str(data).strip())
 					# iterates through the channels and starts a new thread to run the action
 					for channel in self.channels:
 						thread.start_new_thread(channel.do_action, (str(data).strip(),)) # runs the action in a new thread
