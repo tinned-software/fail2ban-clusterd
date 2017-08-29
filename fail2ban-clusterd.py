@@ -10,7 +10,7 @@ from daemon import Daemon
 from optparse import OptionParser
 from classes import Fanout_Channel, Fanout_Connection
 
-VERSION="0.1"
+VERSION="0.1.0"
 # the MyDaemon class implements all functionality of the Daemon class and runs the code as daemon
 class MyDaemon(Daemon):
 	def run(self):
