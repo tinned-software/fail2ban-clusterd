@@ -108,5 +108,5 @@ ENV/
 ###
 TODO
 test.py
-fail2ban-clusterd.yml
+fail2ban-cluster.yml
 
