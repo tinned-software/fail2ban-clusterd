@@ -63,7 +63,7 @@ elif int(yml['log_level']) > 2:
 # initialize logging with the log file
 logging.basicConfig(filename=str(yml['log_file']),
 	filemode='a',
-	format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+	format='%(asctime)s,%(msecs)d %(name)s [client] %(levelname)s %(message)s',
 	datefmt='%H:%M:%S',
 	level=lvl)
 logging.info("Client started and successfully read yml file")
