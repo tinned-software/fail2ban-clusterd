@@ -44,7 +44,7 @@ class MyDaemon(Daemon):
 				if "!" in str(channel['action']) or "\n" in str(channel['action']) or "^" in str(channel['action']): # check if any invalid characters are in the action
 					logging.error("Unvalid charakter in action of channel "+channel['name']+" in server "+server['host']+":"+server['port'])
 					sys.exit(1)
-				channel_list.append(Fanout_Channel(str(channel['name']), str(channel['action']))) # adding the channel to the channel_list
+				channel_list.append(Fanout_Channel(str(channel['name']), str(channel['action']), channel['filter'])) # adding the channel to the channel_list
 			self.connection_list.append(Fanout_Connection(str(server['host']), int(server['port']), int(server['ping_timeout']), channel_list)) # adding the server to the list of servers/connections
 			logging.info("Successfully loaded config for channel "+channel['name']+" from yml file")
 		logging.info("Successfully loaded config for server "+server['host']+" from yml file")

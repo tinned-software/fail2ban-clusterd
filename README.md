@@ -38,7 +38,15 @@ servers:
     ping_timeout: 60
     channels:
       - name: Fail2ban
-        action: "fail2ban-client set %jail% banip %ip%"
+        action: "fail2ban-client set %jail% %action% %ip%"
+    filter:
+      - key: action
+        values:
+          - banip
+          - unbanip
+      - key: jail
+        values:
+          - sshd
 log_level: 3
 log_file: /var/log/fail2ban-clusterd.log
 pid_file: /var/run/fail2ban-clusterd.pid
@@ -46,6 +54,10 @@ pid_file: /var/run/fail2ban-clusterd.pid
 
 There is only one server called host.example.com and for this server only one channel called Fail2ban.
 The channel has the action to ban an IP with fail2ban when it gets a message. 
+
+We also set two filters. The key "action" can only have the value "banip" or "unbanip" and the key "jail" can only have the values "sshd".
+You can imagine it like this in logic like this: `(%action% == "banip" || %action% == "unbanip") && %jail% == "sshd"`
+If this is not true for the incomming values, the action won't be executed.
 
 ### Daemon
 
@@ -63,12 +75,12 @@ to load an alternative config file.
 
 You can start the client with the following:
 ```
-python fail2ban-cluster-client.py -c Fail2ban -m "jail=sshd, ip=192.168.0.1"
+python fail2ban-cluster-client.py -c Fail2ban -m "jail=sshd, action=banip, ip=192.168.0.1"
 ```
 This sends the message to every server that has a channel called Fail2ban.
 You can also specify this even further:
 ```
-python fail2ban-cluster-client.py --host=host.example.com -p 1234 -c Fail2ban -m "jail=sshd, ip=192.168.0.1"
+python fail2ban-cluster-client.py --host=host.example.com -p 1234 -c Fail2ban -m "jail=sshd, action=banip, ip=192.168.0.1"
 ```
 This sends only to the channel to the specified host.
 
@@ -77,9 +89,10 @@ To use with fail2ban, you have to execute the client with the parameters after s
 ### The process
 
 The daemon recieves data from the client.
-Data: `Fail2ban!jail=sshd, ip=192.168.0.1`
+Data: `Fail2ban!jail=sshd, action=banip, ip=192.168.0.1`
 
 This message will be split up into channel and message. The message will also again split up into key and value (e.g. key=jail and value=sshd).
+Then keys and values go through the filter. In our example the result is true, so the action will be executed at the end.
 
 There are also predefined special keys:
 
@@ -88,6 +101,6 @@ There are also predefined special keys:
 | %_msg%     | inserts the whole message |
 | %_channel% | inserts channel name      |
 
-After this the daemon inserts the value for the keys into the specified action: 
-`fail2ban-client set %jail% banip %ip%` -> `fail2ban-client set sshd banip 192.168.0.1`
+After this the daemon inserts the value for the keys into the specified action:
+```fail2ban-client set %jail% %action% %ip%` -> `fail2ban-client set sshd banip 192.168.0.1```
 and will be executed with the same rights the daemon has.

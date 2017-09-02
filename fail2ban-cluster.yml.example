@@ -4,7 +4,15 @@ servers:
     ping_timeout: 10
     channels:
       - name: Test1
-        action: "/path/to/executable \"%ip% - %hugo% - %ups% - %_msg%\" >>/path/to/logfile.txt"
+        action: "fail2ban-client set %jail% %action% %ip%"
+        filter:
+          - key: action
+            values:
+              - banip
+              - unbanip
+          - key: jail
+            values:
+              - sshd
 log_level: 3
 log_file: /var/log/fail2ban-clasterd.log
 pid_file: /var/run/fail2ban-clusterd.pid

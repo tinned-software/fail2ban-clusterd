@@ -9,9 +9,10 @@ import socket, os, thread, time, logging
 # Such a channel has a specific name and action.
 class Fanout_Channel:
 	# the constructor
-	def __init__(self, name, action):
+	def __init__(self, name, action, filter):
 		self.name=name
 		self.action=action
+		self.filter=filter
 
 	# the function that runs the action with the given data from the server
 	def do_action(self, data):
@@ -30,12 +31,31 @@ class Fanout_Channel:
 		# if "=" is in the message, get the key and value
 		if "=" in message:
 			messageSplit=message.split(",")
-			array=[]
+			array=[] 
 			# iterating throught the message and store key and value in a 2-dimensional array
 			for i in range(len(messageSplit)):
 				array.append([])
-				array[i].append(messageSplit[i].split("=")[0].strip())
-				array[i].append(messageSplit[i].split("=")[1].strip())
+				array[i].append(messageSplit[i].split("=")[0].strip()) # 0 = key
+				array[i].append(messageSplit[i].split("=")[1].strip()) # 1 = value
+
+
+			# iterating through all filters set for this channel
+			for filter in self.filter:
+				match=False
+				# iterating through all possible values for the keys
+				for value in filter['values']:
+					# iterating through the array of current keys and values
+					for pair in array:
+						# getting the right key
+						if pair[0] == filter['key']:
+							# check if value is the same
+							if pair[1] == value:
+								match=True
+								break
+
+				# check if the value was the same for the filter
+				if match == False:
+					return
 
 			# iterating through the array and replace key with value in the action
 			for i in array:
