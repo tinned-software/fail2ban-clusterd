@@ -3,6 +3,13 @@
 With fail2ban-clusterd you can send a message over a message broker like "fanout" to other systems.
 The systems that recieve the messages will run a specified command with specified values.
 
+## Installation
+
+Fail2ban-clusterd is written in python and requires the following python libraries. To install them use "pip".
+
+    pip install pyYAML
+
+
 ## The daemon
 
 fail2ban-clusterd.py is a daemon written in python.
