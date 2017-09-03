@@ -42,8 +42,10 @@ class Fanout_Channel:
 			# iterating through all filters set for this channel
 			for filter in self.filter:
 				match=False
+				logging.debug(channel+" - Filter - Check filter '"+filter['key']+"'")
 				# iterating through all possible values for the keys
 				for value in filter['values']:
+					logging.debug(channel+" - Filter - Check Value '"+value+"'")
 					# iterating through the array of current keys and values
 					for pair in array:
 						# getting the right key
@@ -51,10 +53,12 @@ class Fanout_Channel:
 							# check if value is the same
 							if pair[1] == value:
 								match=True
+								logging.debug(channel+" - Filter - Found match at key="+filter['key']+", value="+value)
 								break
 
 				# check if the value was the same for the filter
 				if match == False:
+                                        logging.info(channel+" - Filter - Result: Ignore message")
 					return
 
 			# iterating through the array and replace key with value in the action
@@ -83,6 +87,7 @@ class Fanout_Channel:
 		                dont_care_count+=2
 
 		# sending the action to the os and execute it as command
+                logger.info("Executing action '"+local_action+"'")
 		os.system(local_action)
 
 # This class represents a fanout connection.

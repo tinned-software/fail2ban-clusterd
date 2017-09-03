@@ -81,7 +81,7 @@ for server in yml['servers']:
 			CHANNEL=str(options.channel_name)
 			MESSAGE=str(options.message)
 			try:
-				logging.info("Started announcing")
+				logging.info("Started announcing message '"+MESSAGE+"'")
 				s=socket.socket(socket.AF_INET, socket.SOCK_STREAM) # initialize socket
 				s.connect((TCP_IP, TCP_PORT)) # connect to the server
 				s.send("announce "+CHANNEL+" "+MESSAGE+"\n") # send the message
