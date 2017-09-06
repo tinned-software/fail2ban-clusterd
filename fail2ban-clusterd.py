@@ -29,8 +29,8 @@ class MyDaemon(Daemon):
 		# initialize the log with some parameter
 		logging.basicConfig(filename=str(yml['log_file']),
                             filemode='a', # append
-                            format='%(asctime)s,%(msecs)d %(name)s [daemon] %(levelname)s %(message)s', # line format
-                            datefmt='%H:%M:%S', # date and time format
+                            format='[%(asctime)s,%(msecs)d] [%(name)s] [daemon] %(levelname)s %(message)s', # line format
+                            datefmt='%Y-%m-%d %H:%M:%S', # date and time format
                             level=lvl) # log level
 		logging.info("Daemon started and successfully read yml file")
 
